@@ -20,6 +20,7 @@ func main() {
 		for j := i + 1; j < len(n); j++ {
 			if n[i]+n[j] == 2020 {
 				fmt.Println(n[i] * n[j])
+				break
 			}
 		}
 	}
