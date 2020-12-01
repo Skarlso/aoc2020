@@ -21,6 +21,7 @@ func main() {
 			for g := j + 1; g < len(n); g++ {
 				if n[i]+n[j]+n[g] == 2020 {
 					fmt.Println(n[i] * n[j] * n[g])
+					break
 				}
 			}
 		}
