@@ -1,3 +1,3 @@
-module aoc2020/day7-part1
+module aoc2020/day7
 
 go 1.14

@@ -1,3 +1,3 @@
-module aoc2020/day17-part1
+module aoc2020/day17
 
 go 1.14

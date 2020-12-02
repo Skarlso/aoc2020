@@ -1,3 +1,3 @@
-module aoc2020/day21-part1
+module aoc2020/day21
 
 go 1.14
