@@ -3,10 +3,152 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"regexp"
 	"strconv"
 	"strings"
 )
+
+type pass struct {
+	byr string
+	iyr string
+	eyr string
+	hgt string
+	hcl string
+	ecl string
+	pid string
+	cid string
+}
+
+func (p *pass) isValid() bool {
+	// TODO Add cid when it matters.
+	if p.byr == "" || p.iyr == "" || p.eyr == "" || p.hgt == "" || p.hcl == "" || p.ecl == "" || p.pid == "" {
+		return false
+	}
+	return p.validateByr() && p.validateIyr() && p.validateEyr() && p.validateHgt() && p.validateHcl() && p.validateEcl() && p.validatePid() && p.validateCid()
+}
+
+func (p *pass) validateByr() bool {
+	if len(p.byr) != 4 {
+		fmt.Println("Not 4 byr")
+		return false
+	}
+	i := convertToInt("byr", p.byr, 0)
+	if !inBetween(i, 1920, 2002) {
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateIyr() bool {
+	if len(p.iyr) != 4 {
+		fmt.Println("Not 4 iyr")
+		return false
+	}
+	i := convertToInt("iyr", p.iyr, 0)
+	if !inBetween(i, 2010, 2020) {
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateEyr() bool {
+	if len(p.eyr) != 4 {
+		return false
+	}
+	i := convertToInt("eyr", p.eyr, 0)
+	if !inBetween(i, 2020, 2030) {
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateHgt() bool {
+	if strings.HasSuffix(p.hgt, "cm") {
+		v := strings.TrimSuffix(p.hgt, "cm")
+		i := convertToInt("hgt cm", v, 0)
+		if i < 150 || i > 193 {
+			fmt.Println("Not between hgt cm i: ", i)
+			return false
+		}
+	} else if strings.HasSuffix(p.hgt, "in") {
+		v := strings.TrimSuffix(p.hgt, "in")
+		i := convertToInt("hgt in", v, 0)
+		if i < 59 || i > 76 {
+			fmt.Println("Not between hgt in i: ", i)
+			return false
+		}
+	} else {
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateHcl() bool {
+	if p.hcl[0] != '#' {
+		return false
+	}
+	// trim the #
+	r := regexp.MustCompile(`^[a-f|0-9]+$`)
+	v := string(p.hcl[1:])
+
+	if !r.MatchString(v) {
+		fmt.Println("No match hcl: ", v)
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateEcl() bool {
+	allowed := []string{"amb", "blu", "brn", "gry", "grn", "hzl", "oth"}
+	if !contains(allowed, p.ecl) {
+		return false
+	}
+	return true
+}
+
+func (p *pass) validatePid() bool {
+	if len(p.pid) != 9 {
+		fmt.Println("Pid length not 9: ", p.pid)
+		return false
+	}
+	return true
+}
+
+func (p *pass) validateCid() bool {
+	return true
+}
+
+func newPass(lines []string) *pass {
+	p := &pass{}
+	for _, line := range lines {
+		lsplit := strings.Split(line, " ")
+		for _, s := range lsplit {
+			split := strings.Split(s, ":")
+			switch split[0] {
+			case "byr":
+				p.byr = split[1]
+			case "iyr":
+				p.iyr = split[1]
+			case "eyr":
+				p.eyr = split[1]
+			case "hgt":
+				p.hgt = split[1]
+			case "hcl":
+				p.hcl = split[1]
+			case "ecl":
+				p.ecl = split[1]
+			case "pid":
+				p.pid = split[1]
+			case "cid":
+				p.cid = split[1]
+			default:
+				log.Fatal("Unknown field: ", split[0])
+			}
+		}
+	}
+	return p
+}
 
 var test = `pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980
 hcl:#623a2f
@@ -51,116 +193,15 @@ func main() {
 
 	valids := 0
 	for _, pass := range passports {
-		fields := make(map[string]string)
-		for _, f := range pass {
-			split := strings.Split(f, " ")
-			for _, s := range split {
-				split2 := strings.Split(s, ":")
-				fields[split2[0]] = split2[1]
-			}
-			// fmt.Println(fields)
-		}
-		valid := true
-		for _, f := range neededFields {
-			if _, ok := fields[f]; !ok {
-				valid = false
-				break
-			}
-		}
+		p := newPass(pass)
 
-		for _, f := range neededFields {
-			if v, ok := fields[f]; ok && !validateField(f, v) {
-				fmt.Println("Was found not valid: ", pass)
-				valid = false
-				break
-			}
-		}
-
-		if valid {
+		if p.isValid() {
 			fmt.Println("Found valid: ", pass)
 			valids++
 		}
 	}
 
 	fmt.Println("Valids: ", valids)
-}
-
-func validateField(f, v string) bool {
-	// fmt.Println("received fields to validate: ", f, v)
-	if len(v) == 0 {
-		return false
-	}
-
-	switch f {
-	case "byr":
-		if len(v) != 4 {
-			fmt.Println("Not 4 byr")
-			return false
-		}
-		i := convertToInt("byr", v, 0)
-		if !inBetween(i, 1920, 2002) {
-			return false
-		}
-	case "iyr":
-		if len(v) != 4 {
-			fmt.Println("Not 4 iyr")
-			return false
-		}
-		i := convertToInt("iyr", v, 0)
-		if !inBetween(i, 2010, 2020) {
-			return false
-		}
-	case "eyr":
-		if len(v) != 4 {
-			return false
-		}
-		i := convertToInt("eyr", v, 0)
-		if !inBetween(i, 2020, 2030) {
-			return false
-		}
-	case "hgt":
-		if strings.HasSuffix(v, "cm") {
-			v = strings.TrimSuffix(v, "cm")
-			i := convertToInt("hgt cm", v, 0)
-			if i < 150 || i > 193 {
-				fmt.Println("Not between hgt cm i: ", i)
-				return false
-			}
-		} else if strings.HasSuffix(v, "in") {
-			v = strings.TrimSuffix(v, "in")
-			i := convertToInt("hgt in", v, 0)
-			if i < 59 || i > 76 {
-				fmt.Println("Not between hgt in i: ", i)
-				return false
-			}
-		} else {
-			return false
-		}
-	case "hcl":
-		if v[0] != '#' {
-			return false
-		}
-		// trim the #
-		r := regexp.MustCompile(`^[a-f|0-9]+$`)
-		v = string(v[1:])
-
-		if !r.MatchString(v) {
-			fmt.Println("No match hcl: ", v)
-			return false
-		}
-	case "ecl":
-		allowed := []string{"amb", "blu", "brn", "gry", "grn", "hzl", "oth"}
-		if !contains(allowed, v) {
-			return false
-		}
-	case "pid":
-		if len(v) != 9 {
-			fmt.Println("Pid length not 9: ", v)
-			return false
-		}
-	}
-
-	return true
 }
 
 // convertToInt converts a string to int and prints the error in red
