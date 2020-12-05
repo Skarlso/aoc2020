@@ -36,7 +36,7 @@ func main() {
 		)
 		rws := make([]int, len(rows))
 		copy(rws, rows)
-		firstHalf := line[:8]
+		firstHalf := line[:7]
 		lastHalf := line[7:]
 
 		// do the binary search
