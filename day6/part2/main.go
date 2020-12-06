@@ -46,13 +46,9 @@ func main() {
 			}
 		}
 
-		if len(g) == 1 {
-			yes += len(yess)
-		} else {
-			for _, y := range yess {
-				if y == len(g) {
-					yes++
-				}
+		for _, y := range yess {
+			if y == len(g) {
+				yes++
 			}
 		}
 		totalYes += yes
