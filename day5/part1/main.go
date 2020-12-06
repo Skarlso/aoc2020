@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"strings"
 )
 
@@ -35,7 +34,7 @@ func main() {
 		)
 		rws := make([]int, len(rows))
 		copy(rws, rows)
-		firstHalf := line[:8]
+		firstHalf := line[:7]
 		lastHalf := line[7:]
 
 		// do the binary search
@@ -46,9 +45,6 @@ func main() {
 			} else if c == 'B' {
 				rws = rws[i:]
 			}
-		}
-		if len(rws) != 1 {
-			log.Fatal("Ops.. ", rws)
 		}
 		row = rws[0]
 
