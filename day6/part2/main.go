@@ -38,13 +38,11 @@ func main() {
 		for _, ig := range g {
 			for _, c := range ig {
 				yess[c]++
-			}
-		}
-
-		// The number of same characters must equal to the number of people in the group.
-		for _, y := range yess {
-			if y == len(g) {
-				yes++
+				if yess[c] == len(g) {
+					yes++
+				} else if yess[c] > len(g) {
+					yes--
+				}
 			}
 		}
 		totalYes += yes
