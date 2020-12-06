@@ -32,11 +32,6 @@ func main() {
 
 	totalYes := 0
 	for _, g := range groups {
-		// Read group. Count characters. The number of
-		// yes will be the same letter in which every group
-		// had it. So it's the letter which is there in every group.
-		// If there is only one group, then it's all unique letters.
-
 		yess := make(map[rune]int)
 		yes := 0
 
@@ -46,6 +41,7 @@ func main() {
 			}
 		}
 
+		// The number of same characters must equal to the number of people in the group.
 		for _, y := range yess {
 			if y == len(g) {
 				yes++
