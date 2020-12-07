@@ -35,7 +35,6 @@ func main() {
 		containedBags := strings.Split(contain, ",")
 		var addBags []bag
 
-		// These will signify the end of the chain...
 		if contain == " no other bags" {
 			bags[bagName] = nil
 			continue
@@ -50,20 +49,14 @@ func main() {
 		bags[bagName] = addBags
 	}
 
-	c := traverse(bags, "shiny gold", 1)
-	// Why is there a -1? Because the last return somehow pushes a 0 through somewhere. Meh.
+	c := traverse(bags, "shiny gold")
 	fmt.Println("count: ", c-1)
 }
 
-func traverse(bags map[string][]bag, current string, count int) int {
-	if bags[current] == nil {
-		return count
-	}
-
-	c := 0
+func traverse(bags map[string][]bag, current string) int {
+	c := 1
 	for _, b := range bags[current] {
-		c += b.contains * traverse(bags, b.name, count)
+		c += b.contains * traverse(bags, b.name)
 	}
-	count += c
-	return count
+	return c
 }
