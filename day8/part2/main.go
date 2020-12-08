@@ -27,79 +27,58 @@ func main() {
 
 	// first, try every jmp
 	for _, i := range jmps {
-		acc := 0
-		offset := 0
-		seen := make(map[int]struct{})
 		newLines := make([]string, len(lines))
 		copy(newLines, lines)
 
 		newLines[i] = strings.ReplaceAll(newLines[i], "jmp", "nop")
 
-		for {
-			if _, ok := seen[offset]; ok {
-				break
-			}
-			instruction := strings.Split(newLines[offset], " ")
-			// fmt.Println(lines[offset])
-			seen[offset] = struct{}{}
-			op := instruction[0]
-			inst, _ := strconv.Atoi(instruction[1])
-			// fmt.Println(op, inst, acc)
-			switch op {
-			case "acc":
-				acc += inst
-				offset++
-			case "jmp":
-				offset += inst
-			case "nop":
-				// do nothing
-				offset++
-			}
-
-			if offset >= len(newLines) {
-				fmt.Println("We have a winner: ", acc)
-				return
-			}
+		if loop(newLines) {
+			return
 		}
 	}
 
 	// second, try every nop
-	// first, try every jmp
 	for _, i := range nops {
-		acc := 0
-		offset := 0
-		seen := make(map[int]struct{})
 		newLines := make([]string, len(lines))
 		copy(newLines, lines)
 
 		newLines[i] = strings.ReplaceAll(newLines[i], "nop", "jmp")
 
-		for {
-			if _, ok := seen[offset]; ok {
-				break
-			}
-			instruction := strings.Split(newLines[offset], " ")
-			// fmt.Println(lines[offset])
-			seen[offset] = struct{}{}
-			op := instruction[0]
-			inst, _ := strconv.Atoi(instruction[1])
-			// fmt.Println(op, inst, acc)
-			switch op {
-			case "acc":
-				acc += inst
-				offset++
-			case "jmp":
-				offset += inst
-			case "nop":
-				// do nothing
-				offset++
-			}
-
-			if offset >= len(newLines) {
-				fmt.Println("We have a winner: ", acc)
-				return
-			}
+		if loop(newLines) {
+			return
 		}
 	}
 
+}
+
+func loop(newLines []string) bool {
+	acc := 0
+	offset := 0
+	seen := make(map[int]struct{})
+	for {
+		if _, ok := seen[offset]; ok {
+			break
+		}
+		instruction := strings.Split(newLines[offset], " ")
+		seen[offset] = struct{}{}
+		op := instruction[0]
+		inst, _ := strconv.Atoi(instruction[1])
+		// fmt.Println(op, inst, acc)
+		switch op {
+		case "acc":
+			acc += inst
+			offset++
+		case "jmp":
+			offset += inst
+		case "nop":
+			// do nothing
+			offset++
+		}
+
+		if offset >= len(newLines) {
+			fmt.Println("We have a winner: ", acc)
+			return true
+		}
+	}
+	return false
 }
