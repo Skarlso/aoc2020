@@ -53,7 +53,7 @@ func (r *Runner) Run() (bool, error) {
 	seen := make(map[int]struct{})
 	for {
 		if _, ok := seen[r.Offset]; ok {
-			return false, fmt.Errorf("Already seen. Possible endless loop? Offset: %d", r.Offset)
+			return false, fmt.Errorf("Already seen. Possible endless loop? Offset: %d, Acc: %d", r.Offset, r.Accumulator)
 		}
 		seen[r.Offset] = struct{}{}
 		instruction := strings.Split(r.Lines[r.Offset], " ")
