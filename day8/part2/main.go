@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -41,10 +42,12 @@ func main() {
 	for _, i := range nops {
 		newLines := make([]string, len(lines))
 		copy(newLines, lines)
-
 		newLines[i] = strings.ReplaceAll(newLines[i], "nop", "jmp")
 
-		if loop(newLines) {
+		runner := asm.NewASMRunner(newLines)
+		if ok, err := runner.Run(); err != nil {
+			log.Fatal(err)
+		} else if ok {
 			return
 		}
 	}
