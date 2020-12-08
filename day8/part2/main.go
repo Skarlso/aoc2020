@@ -1,12 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
-	"strconv"
 	"strings"
+
+	"github.com/Skarlso/aoc2020/asm"
 )
 
 func main() {
@@ -33,7 +33,10 @@ func main() {
 
 		newLines[i] = strings.ReplaceAll(newLines[i], "jmp", "nop")
 
-		if loop(newLines) {
+		runner, _ := asm.NewASMRunner(newLines)
+		if ok, err := runner.Run(); err != nil {
+			log.Fatal(err)
+		} else if ok {
 			return
 		}
 	}
@@ -44,7 +47,7 @@ func main() {
 		copy(newLines, lines)
 		newLines[i] = strings.ReplaceAll(newLines[i], "nop", "jmp")
 
-		runner := asm.NewASMRunner(newLines)
+		runner, _ := asm.NewASMRunner(newLines)
 		if ok, err := runner.Run(); err != nil {
 			log.Fatal(err)
 		} else if ok {
@@ -52,36 +55,4 @@ func main() {
 		}
 	}
 
-}
-
-func loop(newLines []string) bool {
-	acc := 0
-	offset := 0
-	seen := make(map[int]struct{})
-	for {
-		if _, ok := seen[offset]; ok {
-			break
-		}
-		instruction := strings.Split(newLines[offset], " ")
-		seen[offset] = struct{}{}
-		op := instruction[0]
-		inst, _ := strconv.Atoi(instruction[1])
-		// fmt.Println(op, inst, acc)
-		switch op {
-		case "acc":
-			acc += inst
-			offset++
-		case "jmp":
-			offset += inst
-		case "nop":
-			// do nothing
-			offset++
-		}
-
-		if offset >= len(newLines) {
-			fmt.Println("We have a winner: ", acc)
-			return true
-		}
-	}
-	return false
 }

@@ -1,11 +1,12 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
-	"strconv"
 	"strings"
+
+	"github.com/Skarlso/aoc2020/asm"
 )
 
 func main() {
@@ -18,32 +19,35 @@ func main() {
 		lines = append(lines, l)
 	}
 
-	acc := 0
-	offset := 0
+	// acc := 0
+	// offset := 0
 
-	seen := make(map[int]struct{})
-	for {
-		if _, ok := seen[offset]; ok {
-			break
-		}
-		instruction := strings.Split(lines[offset], " ")
-		// fmt.Println(lines[offset])
-		seen[offset] = struct{}{}
+	// seen := make(map[int]struct{})
+	// for {
+	// 	if _, ok := seen[offset]; ok {
+	// 		break
+	// 	}
+	// 	instruction := strings.Split(lines[offset], " ")
+	// 	// fmt.Println(lines[offset])
+	// 	seen[offset] = struct{}{}
 
-		op := instruction[0]
-		inst, _ := strconv.Atoi(instruction[1])
-		// fmt.Println(op, inst, acc)
-		switch op {
-		case "acc":
-			acc += inst
-			offset++
-		case "jmp":
-			offset += inst
-		case "nop":
-			// do nothing
-			offset++
-		}
+	// 	op := instruction[0]
+	// 	inst, _ := strconv.Atoi(instruction[1])
+	// 	// fmt.Println(op, inst, acc)
+	// 	switch op {
+	// 	case "acc":
+	// 		acc += inst
+	// 		offset++
+	// 	case "jmp":
+	// 		offset += inst
+	// 	case "nop":
+	// 		// do nothing
+	// 		offset++
+	// 	}
+	// }
+
+	runner, _ := asm.NewASMRunner(lines)
+	if _, err := runner.Run(); err != nil {
+		log.Fatal(err)
 	}
-
-	fmt.Println(acc)
 }

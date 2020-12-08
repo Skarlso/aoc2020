@@ -37,7 +37,9 @@ func (r *Runner) Nop(x int) {
 // NewASMRunner creates a runner and sets up all known instructions
 // and their respective executioners.
 func NewASMRunner(lines []string) (*Runner, error) {
-	a := &Runner{}
+	a := &Runner{
+		Lines: lines,
+	}
 	a.InstructionMap = map[string]InstructionExecuter{
 		"jmp": a.Jmp,
 		"nop": a.Nop,
