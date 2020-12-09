@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/Skarlso/aoc2020/perf"
+	"github.com/Skarlso/aoc2020/pkg/perf"
 )
 
 var target = 41682220

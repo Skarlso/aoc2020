@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Skarlso/aoc2020/asm"
+	"github.com/Skarlso/aoc2020/pkg/asm"
 )
 
 func main() {

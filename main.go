@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Skarlso/aoc2020/aoc"
+	"github.com/Skarlso/aoc2020/pkg/aoc"
 )
 
 var (
