@@ -10,7 +10,7 @@ import (
 )
 
 // DownloadInput downloads and saves the requested input file.
-func DownloadInput(year, day, part int) (string, error) {
+func DownloadInput(year, day int) (string, error) {
 	sessionID := os.Getenv("AOC_SESSION")
 	if sessionID == "" {
 		log.Fatal("No AOC_SESSION is set.")
@@ -36,8 +36,8 @@ func DownloadInput(year, day, part int) (string, error) {
 		return "", DownloadError{StatusCode: resp.StatusCode}
 	}
 
-	targetDir := fmt.Sprintf("input/day%02d", day)
-	targetFile := fmt.Sprintf("%s/part%d", targetDir, part)
+	targetDir := fmt.Sprintf("days/day%d", day)
+	targetFile := fmt.Sprintf("%s/input.txt", targetDir)
 
 	ensurePath(targetDir)
 
