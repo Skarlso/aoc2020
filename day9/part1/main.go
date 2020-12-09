@@ -7,6 +7,8 @@ import (
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/Skarlso/aoc2020/perf"
 )
 
 type sum struct {
@@ -14,6 +16,8 @@ type sum struct {
 }
 
 func main() {
+	defer perf.Duration(perf.Track("Part1"))
+
 	if len(os.Args) < 1 {
 		log.Fatal("Missing file name argument.")
 	}

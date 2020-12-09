@@ -8,11 +8,14 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/Skarlso/aoc2020/perf"
 )
 
 var target = 41682220
 
 func main() {
+	defer perf.Duration(perf.Track("Part2"))
 	if len(os.Args) < 1 {
 		log.Fatal("Missing file name argument.")
 	}
