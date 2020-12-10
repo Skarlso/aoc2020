@@ -23,7 +23,7 @@ func main() {
 		lines = append(lines, l)
 	}
 
-	ints := make([]int, 0)
+	ints := []int{0}
 	max := 0
 	for _, l := range lines {
 		v, _ := strconv.Atoi(l)
@@ -36,12 +36,10 @@ func main() {
 	rating := max + 3
 	sort.Ints(ints)
 
-	all := []int{0}
-	all = append(all, ints...)
-	all = append(all, rating)
+	ints = append(ints, rating)
 	path := make(map[int]struct{})
-	for _, a := range all {
-		path[a] = struct{}{}
+	for _, i := range ints {
+		path[i] = struct{}{}
 	}
 	fmt.Println(traverse(0, path))
 }
