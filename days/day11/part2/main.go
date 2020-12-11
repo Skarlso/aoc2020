@@ -31,16 +31,6 @@ func main() {
 		plane = append(plane, s)
 	}
 
-	seats := make(map[point]string)
-	for x, row := range plane {
-		for y, col := range row {
-			if col == "L" {
-				seats[point{x: x, y: y}] = "L"
-			}
-		}
-	}
-
-	displayPlane(plane)
 	for {
 		noChange := true
 		nplane := copyPlane(plane)
@@ -54,8 +44,6 @@ func main() {
 				nplane[y][x] = newValue
 			}
 		}
-
-		// displayPlane(nplane)
 
 		if noChange {
 			break
@@ -84,16 +72,6 @@ func copyPlane(plane [][]string) [][]string {
 		nplane = append(nplane, row)
 	}
 	return nplane
-}
-
-func displayPlane(plane [][]string) {
-	for _, y := range plane {
-		for _, x := range y {
-			fmt.Print(x)
-		}
-		fmt.Println()
-	}
-	fmt.Println()
 }
 
 // x, y
