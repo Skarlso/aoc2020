@@ -34,14 +34,15 @@ func main() {
 	}
 
 	rating := max + 3
+	ints = append(ints, rating)
 	sort.Ints(ints)
 
-	ints = append(ints, rating)
-	path := make(map[int]struct{})
-	for _, i := range ints {
-		path[i] = struct{}{}
-	}
-	fmt.Println(traverse(0, path))
+	// path := make(map[int]struct{})
+	// for _, i := range ints {
+	// 	path[i] = struct{}{}
+	// }
+	// fmt.Println(traverse(0, path))
+	fmt.Println(dp(0, ints))
 }
 
 var paths = make(map[int]int)
@@ -65,5 +66,24 @@ func traverse(current int, path map[int]struct{}) int {
 		count++
 	}
 	paths[current] = count
+	return count
+}
+
+var cache = make(map[int]int)
+
+func dp(i int, ints []int) int {
+	if i == len(ints)-1 {
+		return 1
+	}
+	if v, ok := cache[i]; ok {
+		return v
+	}
+	count := 0
+	for j := i + 1; j < len(ints); j++ {
+		if ints[j]-ints[i] <= 3 {
+			count += dp(j, ints)
+		}
+	}
+	cache[i] = count
 	return count
 }
