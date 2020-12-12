@@ -29,12 +29,23 @@ func main() {
 		lines = append(lines, l)
 	}
 
-	heading := 0
+	heading := 1
+	headingsX := []int{0, 1, 0, -1}
+	headingsY := []int{1, 0, -1, 0}
 	var (
-		e, s, w, n int
+		x, y int
 	)
-	headings := []int{
-		E, S, W, N,
+	directionsX := map[string]int{
+		"N": 0,
+		"S": 0,
+		"E": 1,
+		"W": -1,
+	}
+	directionsY := map[string]int{
+		"N": 1,
+		"S": -1,
+		"E": 0,
+		"W": 0,
 	}
 	for _, l := range lines {
 		direction := string(l[0])
@@ -43,35 +54,21 @@ func main() {
 
 		switch direction {
 		case "F":
-			switch headings[heading] {
-			case E:
-				e += amount
-			case S:
-				s += amount
-			case W:
-				w += amount
-			case N:
-				n += amount
-			}
-		case "E":
-			e += amount
-		case "W":
-			w += amount
-		case "S":
-			s += amount
-		case "N":
-			n += amount
+			x += headingsX[heading] * amount
+			y += headingsY[heading] * amount
+		case "E", "W", "S", "N":
+			x += directionsX[direction] * amount
+			y += directionsY[direction] * amount
 		case "R":
 			degree := amount / 90
-			heading = modLikePython(heading+degree, len(headings))
+			heading = modLikePython(heading+degree, 4)
 		case "L":
 			degree := amount / 90
-			heading = modLikePython(heading-degree, len(headings))
+			heading = modLikePython(heading-degree, 4)
 		}
 	}
 
-	fmt.Println(e, w, s, n)
-	fmt.Println(abs(e-w) + abs(s-n))
+	fmt.Println(abs(x) + abs(y))
 }
 
 func modLikePython(d, m int) int {
