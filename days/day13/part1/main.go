@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"sort"
 	"strconv"
 	"strings"
 )
@@ -27,8 +26,6 @@ func main() {
 	departure, _ := strconv.Atoi(lines[0])
 	timeTable := strings.Split(lines[1], ",")
 
-	departures := make(map[int]int)
-
 	keys := make([]int, 0)
 	for _, t := range timeTable {
 		if t == "x" {
@@ -36,11 +33,9 @@ func main() {
 		}
 
 		id, _ := strconv.Atoi(t)
-		departures[id] = 0
 		keys = append(keys, id)
 	}
 
-	sort.Ints(keys)
 	min := math.MaxInt64
 	res := 0
 	// Time skip
