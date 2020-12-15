@@ -66,15 +66,10 @@ func main() {
 	fmt.Println(sum)
 }
 
-var bits = []string{"0", "1"}
-
 // returns all masks based on the combinations from the X-es.
 func generateMasks(indexes []int, originalMask []byte) [][]byte {
-	combinations = make([][]byte, 0)
-	combine(bits, "", len(bits), len(indexes))
 	masks := make([][]byte, 0)
-
-	for _, c := range combinations {
+	for _, c := range combine(len(indexes)) {
 		result := make([]byte, len(originalMask))
 		copy(result, originalMask)
 		for i, r := range c {
@@ -102,15 +97,22 @@ func applyMask(n int, mask []byte) []byte {
 	return []byte(result)
 }
 
-var combinations [][]byte
+// 0 = 000
+// 1 = 001
+// 2 = 010
+// 3 = 011
+// 4 = 100
+// 5 = 101
+// 6 = 110
+// 7 = 111
+func combine(n int) [][]byte {
+	combinations := make([][]byte, 0)
 
-func combine(a []string, prefix string, n, k int) {
-	if k == 0 {
-		combinations = append(combinations, []byte(prefix))
-		return
+	// 2 to the power of n
+	for i := 0; i < 1<<n; i++ {
+		binary := fmt.Sprintf("%0*b", n, i)
+		combinations = append(combinations, []byte(binary))
 	}
-	for i := 0; i < n; i++ {
-		newPrefix := prefix + a[i]
-		combine(a, newPrefix, n, k-1)
-	}
+
+	return combinations
 }
