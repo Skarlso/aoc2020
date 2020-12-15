@@ -54,7 +54,7 @@ func main() {
 		}
 		masks := generateMasks(indexes, newMask)
 		for _, m := range masks {
-			i, _ := strconv.ParseInt(m, 2, 64)
+			i, _ := strconv.ParseInt(string(m), 2, 64)
 			memory[int(i)] = int64(number)
 		}
 	}
@@ -69,24 +69,25 @@ func main() {
 var bits = []string{"0", "1"}
 
 // returns all masks based on the combinations from the X-es.
-func generateMasks(indexes []int, originalMask string) []string {
-	combinations = make([]string, 0)
+func generateMasks(indexes []int, originalMask []byte) [][]byte {
+	combinations = make([][]byte, 0)
 	combine(bits, "", len(bits), len(indexes))
-	masks := make([]string, 0)
+	masks := make([][]byte, 0)
 
 	for _, c := range combinations {
-		result := []rune(originalMask)
+		result := make([]byte, len(originalMask))
+		copy(result, originalMask)
 		for i, r := range c {
 			result[indexes[i]] = r
 		}
-		masks = append(masks, string(result))
+		masks = append(masks, result)
 	}
 
 	return masks
 }
 
 // Needs 32 bit integer representation
-func applyMask(n int, mask []byte) string {
+func applyMask(n int, mask []byte) []byte {
 	var result string
 	binary := fmt.Sprintf("%036b", n)
 	for i, c := range binary {
@@ -98,14 +99,14 @@ func applyMask(n int, mask []byte) string {
 			result += "X"
 		}
 	}
-	return result
+	return []byte(result)
 }
 
-var combinations []string
+var combinations [][]byte
 
 func combine(a []string, prefix string, n, k int) {
 	if k == 0 {
-		combinations = append(combinations, prefix)
+		combinations = append(combinations, []byte(prefix))
 		return
 	}
 	for i := 0; i < n; i++ {
