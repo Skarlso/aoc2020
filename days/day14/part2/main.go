@@ -1,12 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -15,18 +15,18 @@ func main() {
 	}
 	name := os.Args[1]
 	content, _ := ioutil.ReadFile(name)
-	split := strings.Split(string(content), "\n")
+	split := bytes.Split(content, []byte("\n"))
 
-	lines := make([]string, 0)
+	lines := make([][]byte, 0)
 	for _, l := range split {
 		lines = append(lines, l)
 	}
 
-	var mask string
+	var mask []byte
 	memory := make(map[int]int64)
 	for _, l := range lines {
-		if strings.HasPrefix(l, "mask") {
-			mask = strings.Split(l, " = ")[1]
+		if bytes.HasPrefix(l, []byte("mask")) {
+			mask = bytes.Split(l, []byte(" = "))[1]
 			continue
 		}
 
@@ -35,7 +35,7 @@ func main() {
 			number int
 		)
 
-		fmt.Sscanf(l, "mem[%d] = %d", &index, &number)
+		fmt.Sscanf(string(l), "mem[%d] = %d", &index, &number)
 
 		// The values are NOT modified. Only the indexes are modified. So we
 		// write the given value to the random indexes.
@@ -55,8 +55,6 @@ func main() {
 		masks := generateMasks(indexes, newMask)
 		for _, m := range masks {
 			i, _ := strconv.ParseInt(m, 2, 64)
-			// newIndex := applyMask(index, m)
-			// fmt.Println("New Index: ", i)
 			memory[int(i)] = int64(number)
 		}
 	}
@@ -88,7 +86,7 @@ func generateMasks(indexes []int, originalMask string) []string {
 }
 
 // Needs 32 bit integer representation
-func applyMask(n int, mask string) string {
+func applyMask(n int, mask []byte) string {
 	var result string
 	binary := fmt.Sprintf("%036b", n)
 	for i, c := range binary {

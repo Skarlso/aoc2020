@@ -8,7 +8,7 @@ import (
 )
 
 func TestApplyMask(t *testing.T) {
-	mask := "XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X"
+	mask := []byte("XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X")
 	number := 11
 
 	got := applyMask(number, mask)
