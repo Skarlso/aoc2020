@@ -37,8 +37,28 @@ func main() {
 
 		fmt.Sscanf(l, "mem[%d] = %d", &index, &number)
 
-		result := applyMask(number, mask)
-		memory[index] = result
+		// The values are NOT modified. Only the indexes are modified. So we
+		// write the given value to the random indexes.
+
+		// Take the original mask... apply a new pattern
+		// That will come back with a new mask
+		// Use that NEW mask to generate
+
+		newMask := applyMask(index, mask)
+		// fmt.Println(newMask)
+		indexes := make([]int, 0)
+		for i, c := range newMask {
+			if c == 'X' {
+				indexes = append(indexes, i)
+			}
+		}
+		masks := generateMasks(indexes, newMask)
+		for _, m := range masks {
+			i, _ := strconv.ParseInt(m, 2, 64)
+			// newIndex := applyMask(index, m)
+			// fmt.Println("New Index: ", i)
+			memory[int(i)] = int64(number)
+		}
 	}
 
 	var sum int64
@@ -48,17 +68,50 @@ func main() {
 	fmt.Println(sum)
 }
 
+var bits = []string{"0", "1"}
+
+// returns all masks based on the combinations from the X-es.
+func generateMasks(indexes []int, originalMask string) []string {
+	combinations = make([]string, 0)
+	combine(bits, "", len(bits), len(indexes))
+	masks := make([]string, 0)
+
+	for _, c := range combinations {
+		result := []rune(originalMask)
+		for i, r := range c {
+			result[indexes[i]] = r
+		}
+		masks = append(masks, string(result))
+	}
+
+	return masks
+}
+
 // Needs 32 bit integer representation
-func applyMask(n int, mask string) int64 {
+func applyMask(n int, mask string) string {
 	var result string
 	binary := fmt.Sprintf("%036b", n)
 	for i, c := range binary {
-		if mask[i] != 'X' {
-			result += string(mask[i])
-		} else {
+		if mask[i] == '0' {
 			result += string(c)
+		} else if mask[i] == '1' {
+			result += "1"
+		} else if mask[i] == 'X' {
+			result += "X"
 		}
 	}
-	i, _ := strconv.ParseInt(result, 2, 64)
-	return i
+	return result
+}
+
+var combinations []string
+
+func combine(a []string, prefix string, n, k int) {
+	if k == 0 {
+		combinations = append(combinations, prefix)
+		return
+	}
+	for i := 0; i < n; i++ {
+		newPrefix := prefix + a[i]
+		combine(a, newPrefix, n, k-1)
+	}
 }
