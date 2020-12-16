@@ -9,13 +9,6 @@ import (
 	"strings"
 )
 
-// var rules = `class: 0-1 or 4-19
-// row: 0-5 or 8-19
-// seat: 0-13 or 16-19`
-
-// var yourTicket = `your ticket:
-// 7,1,14`
-
 var rules = `departure location: 47-874 or 885-960
 departure station: 25-616 or 622-964
 departure platform: 42-807 or 825-966
@@ -38,8 +31,6 @@ wagon: 42-486 or 498-970
 zone: 37-152 or 167-973`
 
 var myTicket = `83,137,101,73,67,61,103,131,151,127,113,107,109,89,71,139,167,97,59,53`
-
-// var myTicket = "11,12,13"
 
 type validator func(in int) bool
 
@@ -70,7 +61,6 @@ func main() {
 
 	// Parse the rules
 	for _, l := range strings.Split(rules, "\n") {
-		// fmt.Println("line: ", l)
 		var (
 			lowerMin, lowerMax int
 			upperMin, upperMax int
@@ -91,10 +81,6 @@ func main() {
 		})
 	}
 
-	// Parse my ticket... But later.
-
-	// Now go through all the lines, parse them, and run all validators.
-	// If one of them fails, the ticket is invalid.
 	validTickets := make([]string, 0)
 	for _, l := range lines {
 		validTicket := true
@@ -120,62 +106,59 @@ func main() {
 		}
 	}
 
-	// I have my valid tickets
-
-	// there are as many columns as there are validators of course. For each column there
-	// is a validator.
-	// fmt.Println("Valid tickets: ", validTickets)
+	// Add my own ticket to the valid tickets
+	validTickets = append(validTickets, myTicket)
 
 	// Save the field once we find the valid column with name and the column it was valid for.
 	fields := make([]field, 0)
-	// We know that eventually we will find a valid column
-	// because we threw out all the invalid tickets.
-	column := 0 // column tracker. which column we are testing ATM for all tickets.
-	for {
-		allFieldsOfTheValidTicket := make([]int, 0)
-		for _, ticket := range validTickets {
-			split := strings.Split(ticket, ",")
-			i, _ := strconv.Atoi(split[column])
-			allFieldsOfTheValidTicket = append(allFieldsOfTheValidTicket, i)
-		}
-
-		// now run all validators on these numbers the one we find that validates them all
-		// is the validator for that column.
+	assignedColumns := make(map[int]struct{})
+	maxColumns := len(validators)
+	// we go until all validators have been found
+	for len(validators) != 0 {
 		for i := 0; i < len(validators); i++ {
 			v := validators[i]
-			valid := true
-			for _, n := range allFieldsOfTheValidTicket {
-				if !v.f(n) {
-					valid = false
-					break
+			// and if it's ONLY valid for a single column then we say it's that column
+			validForCount := 0
+			index := 0
+
+			for c := 0; c < maxColumns; c++ {
+				if _, ok := assignedColumns[c]; ok {
+					// skip already found columns
+					continue
+				}
+
+				valid := true
+				for _, t := range validTickets {
+					values := strings.Split(t, ",")
+					value := values[c]
+					n, _ := strconv.Atoi(value)
+					if !v.f(n) {
+						valid = false
+						break
+					}
+				}
+
+				if valid {
+					validForCount++
+					index = c
 				}
 			}
 
-			if valid {
-				fields = append(fields, field{name: v.name, column: column})
+			if validForCount == 1 {
+				assignedColumns[index] = struct{}{}
+				fields = append(fields, field{name: v.name, column: index})
+				// delete and begin again
 				validators = append(validators[:i], validators[i+1:]...)
 				break
 			}
 		}
-
-		// fmt.Println(fields)
-		column++
-		// if column == 20 {
-		// 	break
-		// }
-		if len(validators) == 0 {
-			break
-		}
 	}
-
-	fmt.Println(fields)
 
 	multi := 1
 	for _, field := range fields {
 		myTicketFields := strings.Split(myTicket, ",")
 		if strings.HasPrefix(field.name, "departure") {
 			i, _ := strconv.Atoi(myTicketFields[field.column])
-			fmt.Println(i)
 			multi *= i
 		}
 	}
