@@ -6,6 +6,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/fatih/color"
+
 	"github.com/Skarlso/aoc2020/pkg/aoc"
 )
 
@@ -57,9 +59,10 @@ func main() {
 			log.Fatal(err)
 		}
 		if ok {
-			fmt.Println(":)")
+			yellow := color.New(color.Bold, color.FgYellow).SprintFunc()
+			fmt.Printf("That's the right answer! You get %s!\n", yellow("one star *"))
 		} else {
-			fmt.Println(":(")
+			fmt.Println("Nope, try again.")
 		}
 	default:
 		displayHelpThenExit()
