@@ -61,6 +61,45 @@ func (img *image) right() string {
 	return result
 }
 
+// find matching side, or has matching side, rotates and flips these images
+// until it either finds a side which is matching or it doesn't.
+func (img *image) hasMatchingSideWith(other *image) bool {
+	flipped := false
+	rotations := 0
+	for {
+		if rotations == 4 && !flipped {
+			flipped = true
+			img.flip()
+			rotations = 0
+		} else if rotations == 4 && flipped {
+			return false
+		}
+
+		// rotate other and match...
+		oFlipped := false
+		oRotations := 0
+		for {
+			// I have to compare all sides... :( This isn't enough. One of the sides should eventually match with any of the other one's sides.
+			// Or does it? I compare the rotated sides to all the other rotated sides don't I.
+			if img.bottom() == other.bottom() || img.top() == other.top() || img.left() == other.left() || img.right() == other.right() {
+				return true
+			}
+			if oFlipped && oRotations == 4 {
+				break
+			} else if !oFlipped && oRotations == 4 {
+				other.flip()
+				oFlipped = true
+				oRotations = 0
+			}
+			other.rotate()
+			oRotations++
+		}
+
+		img.rotate()
+		rotations++
+	}
+}
+
 // checkSides checks if the current image aligns with the rest of the images next to it
 // if there are any.
 func (img *image) checkSides(field [][]*image, x, y int) bool { return false }
@@ -99,11 +138,37 @@ func main() {
 			continue
 		}
 	}
+	// This won't work... Do, find tile with only two matching sides. We need four of those.
 	topLeft := findTopLeftCorner(images)
 	bottomLeft := findBottomLeftCorner(images)
 	topRight := findTopRightCorner(images)
 	bottomRight := findBottomRightCorner(images)
 	fmt.Println("mult: ", topLeft.id*topRight.id*bottomLeft.id*bottomRight.id)
+}
+
+func findTilesWithOnlyTwoMatchingSides(images []*image) []*image {
+	var result []*image
+
+	for i := 0; i < len(images); i++ {
+
+		current := images[i]
+		found := false
+		for j := 0; j < len(images); j++ {
+			next := images[j]
+			if current.id == next.id {
+				continue
+			}
+
+			if current.bottom() == next.bottom() || current.top() == next.top() || current.left() == next.left() || current.right() == next.right() {
+			}
+		}
+
+		if found {
+
+		}
+	}
+
+	return result
 }
 
 // findTopLeftCorner divide and conquer.
