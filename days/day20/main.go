@@ -15,10 +15,31 @@ type image struct {
 }
 
 // rotate always rotates in the right direction
-func (i *image) rotate() {}
+func (img *image) rotate() {
+	// reverse the matrix
+	for i, j := 0, len(img.pixels)-1; i < j; i, j = i+1, j-1 {
+		img.pixels[i], img.pixels[j] = img.pixels[j], img.pixels[i]
+	}
+
+	// transpose it
+	for i := 0; i < len(img.pixels); i++ {
+		for j := 0; j < i; j++ {
+			img.pixels[i][j], img.pixels[j][i] = img.pixels[j][i], img.pixels[i][j]
+		}
+	}
+}
 
 // flip flips top->bottom
-func (i *image) flip() {}
+func (img *image) flip() {
+	// two loops, one top -> bottom, two bottom -> top. i, j -> swap rows
+	for i, j := 0, len(img.pixels)-1; i < j; i, j = i+1, j-1 {
+		img.pixels[i], img.pixels[j] = img.pixels[j], img.pixels[i]
+	}
+}
+
+// checkSides checks if the current image aligns with the rest of the images next to it
+// if there are any.
+func (img *image) checkSides(field [][]*image, x, y int) bool { return false }
 
 func main() {
 	if len(os.Args) < 2 {
@@ -54,4 +75,21 @@ func main() {
 			continue
 		}
 	}
+	corners := findCorners(images)
+	fmt.Println(corners)
+	// fmt.Println(field[0][0], field[len(field)-1][len(field[len(field)-1])], field[0][len(field[len(field)-1])], field[len(field)-1][0])
+}
+
+// findCorners finds the corners. They don't have to be in order, they will be multiplied together.
+func findCorners(images []*image) [][]*image {
+	for i := 0; i < len(images); i++ {
+		for j := 0; j < len(images); j++ {
+
+		}
+	}
+	// find upper-left
+	// find upper-right
+	// find bottom-left
+	// find bottom-right
+	return nil
 }
