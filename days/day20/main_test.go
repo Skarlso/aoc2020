@@ -189,8 +189,28 @@ func TestHasMatchingSide(t *testing.T) {
 			},
 			want: true,
 		},
-		// "one flip":                {},
-		// "one flip and a rotation": {},
+		"one flip": {
+			main: &image{
+				id: 1,
+				pixels: [][]string{
+					{"*", ".", ".", "."},
+					{"*", ".", ".", "."},
+					{".", ".", ".", "."},
+					{"*", ".", ".", "."},
+				},
+			},
+			other: &image{
+				id: 2,
+				pixels: [][]string{
+					{"*", "-", "-", "*"},
+					{".", ".", ".", "*"},
+					{"*", ".", ".", "*"},
+					{"*", "-", "-", "*"},
+				},
+			},
+			want: true,
+		},
+		// "one flip and a rotations": {},
 		"no matching side": {
 			main: &image{
 				id: 1,
