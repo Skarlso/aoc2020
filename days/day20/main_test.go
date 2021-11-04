@@ -64,6 +64,62 @@ func TestFlip(t *testing.T) {
 	}, pixels)
 }
 
+func TestRightSide(t *testing.T) {
+	i := &image{
+		id: 1,
+		pixels: [][]string{
+			{"*", "*", ".", "*"},
+			{".", ".", ".", "*"},
+			{"*", ".", "*", "."},
+			{"*", ".", "*", "*"},
+		},
+	}
+	side := i.right()
+	assert.Equal(t, "**.*", side)
+}
+
+func TestLeftSide(t *testing.T) {
+	i := &image{
+		id: 1,
+		pixels: [][]string{
+			{"*", "*", ".", "*"},
+			{".", ".", ".", "*"},
+			{"*", ".", "*", "."},
+			{"*", ".", "*", "*"},
+		},
+	}
+	side := i.left()
+	assert.Equal(t, "*.**", side)
+}
+
+func TestTopSide(t *testing.T) {
+	i := &image{
+		id: 1,
+		pixels: [][]string{
+			{"*", "*", ".", "."},
+			{".", ".", ".", "*"},
+			{"*", ".", "*", "."},
+			{"*", ".", "*", "*"},
+		},
+	}
+	side := i.top()
+	assert.Equal(t, "**..", side)
+}
+
+func TestBottomSide(t *testing.T) {
+	i := &image{
+		id: 1,
+		pixels: [][]string{
+			{"*", "*", ".", "*"},
+			{".", ".", ".", "*"},
+			{"*", ".", "*", "."},
+			{"*", ".", ".", "."},
+		},
+	}
+	side := i.bottom()
+	assert.Equal(t, "*...", side)
+}
+
 func TestSideChecking(t *testing.T) {
 
 }

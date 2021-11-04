@@ -37,6 +37,30 @@ func (img *image) flip() {
 	}
 }
 
+func (img *image) top() string {
+	return strings.Join(img.pixels[0], "")
+}
+
+func (img *image) bottom() string {
+	return strings.Join(img.pixels[len(img.pixels)-1], "")
+}
+
+func (img *image) left() string {
+	var result string
+	for i := 0; i < len(img.pixels); i++ {
+		result += img.pixels[i][0]
+	}
+	return result
+}
+
+func (img *image) right() string {
+	var result string
+	for i := 0; i < len(img.pixels); i++ {
+		result += img.pixels[i][len(img.pixels[i])-1]
+	}
+	return result
+}
+
 // checkSides checks if the current image aligns with the rest of the images next to it
 // if there are any.
 func (img *image) checkSides(field [][]*image, x, y int) bool { return false }
@@ -75,21 +99,129 @@ func main() {
 			continue
 		}
 	}
-	corners := findCorners(images)
-	fmt.Println(corners)
-	// fmt.Println(field[0][0], field[len(field)-1][len(field[len(field)-1])], field[0][len(field[len(field)-1])], field[len(field)-1][0])
+	topLeft := findTopLeftCorner(images)
+	bottomLeft := findBottomLeftCorner(images)
+	topRight := findTopRightCorner(images)
+	bottomRight := findBottomRightCorner(images)
+	fmt.Println("mult: ", topLeft.id*topRight.id*bottomLeft.id*bottomRight.id)
 }
 
-// findCorners finds the corners. They don't have to be in order, they will be multiplied together.
-func findCorners(images []*image) [][]*image {
-	for i := 0; i < len(images); i++ {
-		for j := 0; j < len(images); j++ {
+// findTopLeftCorner divide and conquer.
+func findTopLeftCorner(images []*image) *image {
+	var result *image
+	// it eventually MUST find one.
+	// topLeft... meaning, try finding matches for
+	for {
+		for i := 0; i < len(images); i++ {
+			// once we find a matching side it's locked.
+			current := images[i]
 
+			found := false
+			rotatedFourTimes := false
+			flipped := false
+			rotations := 0
+			for {
+				if rotatedFourTimes && flipped {
+					break
+				}
+				if rotatedFourTimes && !flipped {
+					rotatedFourTimes = false
+					flipped = true
+					rotations = 0
+					current.flip()
+				}
+
+				// compare
+
+				rotations++
+				if rotations == 4 {
+					rotatedFourTimes = true
+				}
+				current.rotate()
+				if found {
+					break
+				}
+			}
 		}
 	}
-	// find upper-left
-	// find upper-right
-	// find bottom-left
-	// find bottom-right
-	return nil
+	return result
 }
+func findBottomLeftCorner(images []*image) *image {
+	var result *image
+	// it eventually MUST find one.
+	for {
+
+	}
+	return result
+}
+func findTopRightCorner(images []*image) *image {
+	var result *image
+	// it eventually MUST find one.
+	for {
+
+	}
+	return result
+}
+func findBottomRightCorner(images []*image) *image {
+	var result *image
+	// it eventually MUST find one.
+	for {
+
+	}
+	return result
+}
+
+// // findCorners finds the corners. They don't have to be in order, they will be multiplied together.
+// func findCorners(images []*image) []*image {
+// 	for len(result) != 4 {
+// 		// Select one
+// 		// Compare it to the rest -- take care of not comparing it to itself.
+// 		// If found a match... don't rotate/flip it anymore.
+// 		for i := 0; i < len(images); i++ {
+// 			current := images[i]
+// 			// pick a side -> top
+// 			// start matching...
+// 			// found match
+// 			// don't change and look for next matching -> right side
+// 			// found -> put into result
+// 			// not found -> back to start but rotate first.
+// 			// if all sides rotated, flip then begin again.
+// 			// sounds like a backtracking recursive something.
+
+// 			found := false
+// 			rotatedFourTimes := false
+// 			flipped := false
+// 			rotations := 0
+
+// 			for {
+// 				if rotatedFourTimes && flipped {
+// 					break
+// 				}
+// 				if rotatedFourTimes && !flipped {
+// 					rotatedFourTimes = false
+// 					flipped = true
+// 					rotations = 0
+// 					current.flip()
+// 				}
+
+// 				// compare
+
+// 				rotations++
+// 				if rotations == 4 {
+// 					rotatedFourTimes = true
+// 				}
+// 				current.rotate()
+// 			}
+// 			if found {
+// 				result = append(result, current)
+// 				// remove from images
+// 				images = append(images[:i], images[i+1:]...)
+// 			}
+// 		}
+// 	}
+// 	// find upper-left
+// 	// find upper-right
+// 	// find bottom-left
+// 	// find bottom-right
+// 	return result
+// }
