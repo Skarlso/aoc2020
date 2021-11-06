@@ -7,7 +7,7 @@ import (
 )
 
 func TestRotate(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", ".", ".", "*"},
@@ -36,7 +36,7 @@ func TestRotate(t *testing.T) {
 }
 
 func TestFlip(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", "*", ".", "*"},
@@ -65,7 +65,7 @@ func TestFlip(t *testing.T) {
 }
 
 func TestRightSide(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", "*", ".", "*"},
@@ -79,7 +79,7 @@ func TestRightSide(t *testing.T) {
 }
 
 func TestLeftSide(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", "*", ".", "*"},
@@ -93,7 +93,7 @@ func TestLeftSide(t *testing.T) {
 }
 
 func TestTopSide(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", "*", ".", "."},
@@ -107,7 +107,7 @@ func TestTopSide(t *testing.T) {
 }
 
 func TestBottomSide(t *testing.T) {
-	i := &image{
+	i := &tile{
 		id: 1,
 		pixels: [][]string{
 			{"*", "*", ".", "*"},
@@ -122,12 +122,12 @@ func TestBottomSide(t *testing.T) {
 
 func TestHasMatchingSide(t *testing.T) {
 	tests := map[string]struct {
-		main  *image
-		other *image
+		main  *tile
+		other *tile
 		want  bool
 	}{
 		"no rotation": {
-			main: &image{
+			main: &tile{
 				id: 1,
 				pixels: [][]string{
 					{"*", "*", ".", "*"},
@@ -136,7 +136,7 @@ func TestHasMatchingSide(t *testing.T) {
 					{"*", ".", ".", "."},
 				},
 			},
-			other: &image{
+			other: &tile{
 				id: 2,
 				pixels: [][]string{
 					{"*", "*", ".", "*"},
@@ -148,7 +148,7 @@ func TestHasMatchingSide(t *testing.T) {
 			want: true,
 		},
 		"one rotation": {
-			main: &image{
+			main: &tile{
 				id: 1,
 				pixels: [][]string{
 					{"*", ".", ".", "."},
@@ -157,7 +157,7 @@ func TestHasMatchingSide(t *testing.T) {
 					{"*", ".", ".", "."},
 				},
 			},
-			other: &image{
+			other: &tile{
 				id: 2,
 				pixels: [][]string{
 					{"-", "-", "-", "-"},
@@ -169,7 +169,7 @@ func TestHasMatchingSide(t *testing.T) {
 			want: true,
 		},
 		"two rotations": {
-			main: &image{
+			main: &tile{
 				id: 1,
 				pixels: [][]string{
 					{"*", ".", ".", "."},
@@ -178,7 +178,7 @@ func TestHasMatchingSide(t *testing.T) {
 					{"*", ".", ".", "."},
 				},
 			},
-			other: &image{
+			other: &tile{
 				id: 2,
 				pixels: [][]string{
 					{"-", "-", "-", "*"},
@@ -190,7 +190,7 @@ func TestHasMatchingSide(t *testing.T) {
 			want: true,
 		},
 		"one flip": {
-			main: &image{
+			main: &tile{
 				id: 1,
 				pixels: [][]string{
 					{"*", ".", ".", "."},
@@ -199,7 +199,7 @@ func TestHasMatchingSide(t *testing.T) {
 					{"*", ".", ".", "."},
 				},
 			},
-			other: &image{
+			other: &tile{
 				id: 2,
 				pixels: [][]string{
 					{"*", "-", "-", "*"},
@@ -212,7 +212,7 @@ func TestHasMatchingSide(t *testing.T) {
 		},
 		// "one flip and a rotations": {},
 		"no matching side": {
-			main: &image{
+			main: &tile{
 				id: 1,
 				pixels: [][]string{
 					{"*", ".", ".", "."},
@@ -221,7 +221,7 @@ func TestHasMatchingSide(t *testing.T) {
 					{"*", ".", ".", "."},
 				},
 			},
-			other: &image{
+			other: &tile{
 				id: 2,
 				pixels: [][]string{
 					{"-", "-", "-", "-"},

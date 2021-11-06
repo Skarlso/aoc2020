@@ -3,19 +3,20 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 )
 
-// image is an image defined by the ID and the matrix representation of the pixels.
+// tile is an tile defined by the ID and the matrix representation of the pixels.
 // it can rotate and flip itself and give back a given side.
-type image struct {
+type tile struct {
 	id     int
 	pixels [][]string
 }
 
 // rotate always rotates in the right direction
-func (img *image) rotate() {
+func (img *tile) rotate() {
 	// reverse the matrix
 	for i, j := 0, len(img.pixels)-1; i < j; i, j = i+1, j-1 {
 		img.pixels[i], img.pixels[j] = img.pixels[j], img.pixels[i]
@@ -30,22 +31,22 @@ func (img *image) rotate() {
 }
 
 // flip flips top->bottom
-func (img *image) flip() {
+func (img *tile) flip() {
 	// two loops, one top -> bottom, two bottom -> top. i, j -> swap rows
 	for i, j := 0, len(img.pixels)-1; i < j; i, j = i+1, j-1 {
 		img.pixels[i], img.pixels[j] = img.pixels[j], img.pixels[i]
 	}
 }
 
-func (img *image) top() string {
+func (img *tile) top() string {
 	return strings.Join(img.pixels[0], "")
 }
 
-func (img *image) bottom() string {
+func (img *tile) bottom() string {
 	return strings.Join(img.pixels[len(img.pixels)-1], "")
 }
 
-func (img *image) left() string {
+func (img *tile) left() string {
 	var result string
 	for i := 0; i < len(img.pixels); i++ {
 		result += img.pixels[i][0]
@@ -53,7 +54,7 @@ func (img *image) left() string {
 	return result
 }
 
-func (img *image) right() string {
+func (img *tile) right() string {
 	var result string
 	for i := 0; i < len(img.pixels); i++ {
 		result += img.pixels[i][len(img.pixels[i])-1]
@@ -63,7 +64,7 @@ func (img *image) right() string {
 
 // find matching side, or has matching side, rotates and flips these images
 // until it either finds a side which is matching or it doesn't.
-func (img *image) hasMatchingSideWith(other *image) bool {
+func (img *tile) hasMatchingSideWith(other *tile) bool {
 	flipped := false
 	rotations := 0
 	for {
@@ -100,10 +101,6 @@ func (img *image) hasMatchingSideWith(other *image) bool {
 	}
 }
 
-// checkSides checks if the current image aligns with the rest of the images next to it
-// if there are any.
-func (img *image) checkSides(field [][]*image, x, y int) bool { return false }
-
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: main <filename>")
@@ -116,16 +113,15 @@ func main() {
 		os.Exit(1)
 	}
 
-	// format is, ID, some lines, until an empty line
-	var images []*image
-	tiles := bytes.Split(content, []byte("\n"))
-	i := &image{}
+	var tiles []*tile
+	split := bytes.Split(content, []byte("\n"))
+	i := &tile{}
 	i.pixels = make([][]string, 0)
-	for _, line := range tiles {
-		// new image is coming up, finish up the current one and be on our way.
+	for _, line := range split {
+		// new tile is coming up, finish up the current one and be on our way.
 		if string(line) == "" {
-			images = append(images, i)
-			i = &image{}
+			tiles = append(tiles, i)
+			i = &tile{}
 			i.pixels = make([][]string, 0)
 			continue
 		}
@@ -137,156 +133,95 @@ func main() {
 			i.id = d
 			continue
 		}
+
+		pixels := strings.Split(string(line), "")
+		i.pixels = append(i.pixels, pixels)
 	}
-	// This won't work... Do, find tile with only two matching sides. We need four of those.
-	topLeft := findTopLeftCorner(images)
-	bottomLeft := findBottomLeftCorner(images)
-	topRight := findTopRightCorner(images)
-	bottomRight := findBottomRightCorner(images)
-	fmt.Println("mult: ", topLeft.id*topRight.id*bottomLeft.id*bottomRight.id)
+
+	//for _, t := range tiles {
+	//	fmt.Println(t)
+	//}
+
+	// construct all possible tiles
+	for _, t := range tiles {
+		allTiles = append(allTiles, t)
+		for i := 0; i < 2; i++ {
+			for j := 0; j < 4; j++ {
+				current := &tile{
+					id:     t.id,
+					pixels: make([][]string, len(t.pixels)),
+				}
+				for k := range t.pixels {
+					current.pixels[k] = make([]string, len(t.pixels[k]))
+					copy(current.pixels[k], t.pixels[k])
+				}
+				allTiles = append(allTiles, current)
+				t.rotate()
+			}
+			t.flip()
+		}
+		t.rotate()
+	}
+
+	fmt.Println("all tiles:", len(allTiles))
+	for _, t := range allTiles {
+		displayTile(t.pixels)
+		fmt.Println()
+	}
+
+	maxGridSize = int(math.Sqrt(float64(len(allTiles) / 8)))
+	fmt.Println("maxGridSize: ", maxGridSize)
+	image = make([][]*tile, maxGridSize, maxGridSize)
+	for i := range image {
+		image[i] = make([]*tile, maxGridSize, maxGridSize)
+	}
+	visited := make(map[int]struct{}, 0)
+	constructImage(0, 0, visited)
+
+	for _, img := range image {
+		for _, j := range img {
+			fmt.Print(" ", j.id)
+			//fmt.Println(j.pixels)
+		}
+		fmt.Println()
+	}
 }
 
-func findTilesWithOnlyTwoMatchingSides(images []*image) []*image {
-	var result []*image
+var (
+	image       [][]*tile
+	allTiles    []*tile
+	maxGridSize int
+)
 
-	for i := 0; i < len(images); i++ {
-
-		current := images[i]
-		found := false
-		for j := 0; j < len(images); j++ {
-			next := images[j]
-			if current.id == next.id {
-				continue
-			}
-
-			if current.bottom() == next.bottom() || current.top() == next.top() || current.left() == next.left() || current.right() == next.right() {
-			}
+func constructImage(row, col int, visited map[int]struct{}) {
+	//fmt.Println("y: ", y)
+	if row == maxGridSize {
+		return
+	}
+	for _, t := range allTiles {
+		if _, ok := visited[t.id]; ok {
+			continue
 		}
 
-		if found {
-
+		if row > 0 && (image[row-1][col] == nil || image[row-1][col].bottom() != t.top()) {
+			continue
 		}
-	}
-
-	return result
-}
-
-// findTopLeftCorner divide and conquer.
-func findTopLeftCorner(images []*image) *image {
-	var result *image
-	// it eventually MUST find one.
-	// topLeft... meaning, try finding matches for
-	for {
-		for i := 0; i < len(images); i++ {
-			// once we find a matching side it's locked.
-			current := images[i]
-
-			found := false
-			rotatedFourTimes := false
-			flipped := false
-			rotations := 0
-			for {
-				if rotatedFourTimes && flipped {
-					break
-				}
-				if rotatedFourTimes && !flipped {
-					rotatedFourTimes = false
-					flipped = true
-					rotations = 0
-					current.flip()
-				}
-
-				// compare
-
-				rotations++
-				if rotations == 4 {
-					rotatedFourTimes = true
-				}
-				current.rotate()
-				if found {
-					break
-				}
-			}
+		if col > 0 && (image[row][col-1] == nil || image[row][col-1].right() != t.left()) {
+			continue
 		}
+		image[row][col] = t
+		visited[t.id] = struct{}{}
+		if col == maxGridSize-1 {
+			constructImage(row+1, 0, visited)
+		} else {
+			constructImage(row, col+1, visited)
+		}
+		delete(visited, t.id)
 	}
-	return result
-}
-func findBottomLeftCorner(images []*image) *image {
-	var result *image
-	// it eventually MUST find one.
-	for {
-
-	}
-	return result
-}
-func findTopRightCorner(images []*image) *image {
-	var result *image
-	// it eventually MUST find one.
-	for {
-
-	}
-	return result
-}
-func findBottomRightCorner(images []*image) *image {
-	var result *image
-	// it eventually MUST find one.
-	for {
-
-	}
-	return result
 }
 
-// // findCorners finds the corners. They don't have to be in order, they will be multiplied together.
-// func findCorners(images []*image) []*image {
-// 	for len(result) != 4 {
-// 		// Select one
-// 		// Compare it to the rest -- take care of not comparing it to itself.
-// 		// If found a match... don't rotate/flip it anymore.
-// 		for i := 0; i < len(images); i++ {
-// 			current := images[i]
-// 			// pick a side -> top
-// 			// start matching...
-// 			// found match
-// 			// don't change and look for next matching -> right side
-// 			// found -> put into result
-// 			// not found -> back to start but rotate first.
-// 			// if all sides rotated, flip then begin again.
-// 			// sounds like a backtracking recursive something.
-
-// 			found := false
-// 			rotatedFourTimes := false
-// 			flipped := false
-// 			rotations := 0
-
-// 			for {
-// 				if rotatedFourTimes && flipped {
-// 					break
-// 				}
-// 				if rotatedFourTimes && !flipped {
-// 					rotatedFourTimes = false
-// 					flipped = true
-// 					rotations = 0
-// 					current.flip()
-// 				}
-
-// 				// compare
-
-// 				rotations++
-// 				if rotations == 4 {
-// 					rotatedFourTimes = true
-// 				}
-// 				current.rotate()
-// 			}
-// 			if found {
-// 				result = append(result, current)
-// 				// remove from images
-// 				images = append(images[:i], images[i+1:]...)
-// 			}
-// 		}
-// 	}
-// 	// find upper-left
-// 	// find upper-right
-// 	// find bottom-left
-// 	// find bottom-right
-// 	return result
-// }
+func displayTile(pixels [][]string) {
+	for _, v := range pixels {
+		fmt.Println(strings.Join(v, ""))
+	}
+}
