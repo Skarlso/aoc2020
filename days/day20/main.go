@@ -157,14 +157,14 @@ func main() {
 		}
 	}
 
-	fmt.Println("all tiles:", len(allTiles))
-	for _, t := range allTiles {
-		fmt.Print("id: ", t.id)
-		fmt.Println(t.pixels)
-	}
+	//fmt.Println("all tiles:", len(allTiles))
+	//for _, t := range allTiles {
+	//	fmt.Print("id: ", t.id)
+	//	fmt.Println(t.pixels)
+	//}
 
 	maxGridSize = int(math.Sqrt(float64(len(allTiles) / 8)))
-	fmt.Println("maxGridSize: ", maxGridSize)
+	//fmt.Println("maxGridSize: ", maxGridSize)
 	image = make([][]*tile, maxGridSize, maxGridSize)
 	for i := range image {
 		image[i] = make([]*tile, maxGridSize, maxGridSize)
@@ -188,10 +188,10 @@ func constructImage(row, col int, visited map[int64]struct{}) {
 			fmt.Println()
 		}
 		fmt.Println("mult: ", image[0][0].id*image[len(image)-1][0].id*image[0][len(image[0])-1].id*image[len(image)-1][len(image[len(image)-1])-1].id)
-		// THIS IS IMPORTANT! If I'm not stopping here, it will keep on going and rearrange things.
-		// Also, I don't think this is still working right. :D Because now the test is displaying something else.
-		// Also, also considering part 2 this won't work. :D
-		os.Exit(0)
+		// There are 8 possible correct solutions depending on how the tiles are rotated and flipped.
+		// Each will give a correct solution.
+		// Which is fine, it will result in the same thing, we can quit right at the first result.
+		return
 	}
 	for _, t := range allTiles {
 		if _, ok := visited[t.id]; ok {
