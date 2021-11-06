@@ -11,7 +11,7 @@ import (
 // tile is an tile defined by the ID and the matrix representation of the pixels.
 // it can rotate and flip itself and give back a given side.
 type tile struct {
-	id     int
+	id     int64
 	pixels [][]string
 }
 
@@ -128,7 +128,7 @@ func main() {
 
 		// Read the ID for a tile.
 		if strings.Contains(string(line), "Tile") {
-			var d int
+			var d int64
 			fmt.Sscanf(string(line), "Tile %d:", &d)
 			i.id = d
 			continue
@@ -138,13 +138,8 @@ func main() {
 		i.pixels = append(i.pixels, pixels)
 	}
 
-	//for _, t := range tiles {
-	//	fmt.Println(t)
-	//}
-
 	// construct all possible tiles
 	for _, t := range tiles {
-		allTiles = append(allTiles, t)
 		for i := 0; i < 2; i++ {
 			for j := 0; j < 4; j++ {
 				current := &tile{
@@ -160,13 +155,12 @@ func main() {
 			}
 			t.flip()
 		}
-		t.rotate()
 	}
 
 	fmt.Println("all tiles:", len(allTiles))
 	for _, t := range allTiles {
-		displayTile(t.pixels)
-		fmt.Println()
+		fmt.Print("id: ", t.id)
+		fmt.Println(t.pixels)
 	}
 
 	maxGridSize = int(math.Sqrt(float64(len(allTiles) / 8)))
@@ -175,16 +169,8 @@ func main() {
 	for i := range image {
 		image[i] = make([]*tile, maxGridSize, maxGridSize)
 	}
-	visited := make(map[int]struct{}, 0)
+	visited := make(map[int64]struct{}, 0)
 	constructImage(0, 0, visited)
-
-	for _, img := range image {
-		for _, j := range img {
-			fmt.Print(" ", j.id)
-			//fmt.Println(j.pixels)
-		}
-		fmt.Println()
-	}
 }
 
 var (
@@ -193,20 +179,29 @@ var (
 	maxGridSize int
 )
 
-func constructImage(row, col int, visited map[int]struct{}) {
-	//fmt.Println("y: ", y)
+func constructImage(row, col int, visited map[int64]struct{}) {
 	if row == maxGridSize {
-		return
+		for _, img := range image {
+			for _, j := range img {
+				fmt.Print(" ", j.id)
+			}
+			fmt.Println()
+		}
+		fmt.Println("mult: ", image[0][0].id*image[len(image)-1][0].id*image[0][len(image[0])-1].id*image[len(image)-1][len(image[len(image)-1])-1].id)
+		// THIS IS IMPORTANT! If I'm not stopping here, it will keep on going and rearrange things.
+		// Also, I don't think this is still working right. :D Because now the test is displaying something else.
+		// Also, also considering part 2 this won't work. :D
+		os.Exit(0)
 	}
 	for _, t := range allTiles {
 		if _, ok := visited[t.id]; ok {
 			continue
 		}
 
-		if row > 0 && (image[row-1][col] == nil || image[row-1][col].bottom() != t.top()) {
+		if row > 0 && image[row-1][col].bottom() != t.top() {
 			continue
 		}
-		if col > 0 && (image[row][col-1] == nil || image[row][col-1].right() != t.left()) {
+		if col > 0 && image[row][col-1].right() != t.left() {
 			continue
 		}
 		image[row][col] = t
@@ -217,11 +212,5 @@ func constructImage(row, col int, visited map[int]struct{}) {
 			constructImage(row, col+1, visited)
 		}
 		delete(visited, t.id)
-	}
-}
-
-func displayTile(pixels [][]string) {
-	for _, v := range pixels {
-		fmt.Println(strings.Join(v, ""))
 	}
 }
