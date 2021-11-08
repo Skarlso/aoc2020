@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -141,17 +142,13 @@ var (
 	image       [][]*tile
 	allTiles    []*tile
 	maxGridSize int
-	monster     = []string{"                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   "}
 )
 
 func constructImage(row, col int, visited map[int64]struct{}) {
 	if row == maxGridSize {
-		count := findSeaMonsters()
-		fmt.Println("number of monsters in this configuration: ", count)
 		sea := constructSea()
-		for _, s := range sea {
-			fmt.Println(s)
-		}
+		count := findSeaMonsters(sea)
+		fmt.Println("Rough waters in the monsters habitat: ", count)
 		return
 	}
 	for _, t := range allTiles {
@@ -176,10 +173,31 @@ func constructImage(row, col int, visited map[int64]struct{}) {
 	}
 }
 
-func findSeaMonsters() int {
-	// sea := constructSea()
-	// mark monsters.
-	// count '#'s.
+var (
+	monster1     = regexp.MustCompile(`..................#.`)
+	monster2     = regexp.MustCompile(`#....##....##....###`)
+	monster3     = regexp.MustCompile(`.#..#..#..#..#..#...`)
+	monsterCount = 15
+)
+
+// TODO: this is finding two items less than it should be.
+// The regex match is not matching overlapping matches.
+// Open byte compare will work.
+func findSeaMonsters(sea []string) int {
+	found := 0
+	count := 0
+	for i := 0; i < len(sea); i++ {
+		count += strings.Count(sea[i], "#")
+		if monster1.MatchString(sea[i]) && monster2.MatchString(sea[i+1]) && monster3.MatchString(sea[i+2]) {
+			found++
+		}
+	}
+
+	if found > 0 {
+		fmt.Println("found monsters: ", found)
+		count -= monsterCount * found
+		return count
+	}
 	return 0
 }
 
