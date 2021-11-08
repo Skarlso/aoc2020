@@ -186,21 +186,22 @@ func findSeaMonsters() int {
 // constructSea creates a sea by transposing the tiles of the images
 // into a single matrix for better handling.
 func constructSea() []string {
-	// TODOs:
-	// - [ ] remove borders.
-	// - [ ] remove gaps.
 	offsetDown := 0
 	// image count * the size of one tile
 	size := len(image) * len(image[0][0].pixels)
 	sea := make([]string, size)
 	for i := 0; i < len(image); i++ {
 		for j := 0; j < len(image[i]); j++ {
-			pixels := image[i][j].pixels
-			if len(sea[j+(offsetDown*len(pixels))]) >= size {
+			pixels := image[i][j].copyPixels()
+			// remove top and bottom row
+			pixels = pixels[1 : len(pixels)-1]
+			if len(sea[j+(offsetDown*len(pixels))]) >= size-(2*len(image)) {
 				offsetDown++
 			}
 			for y := 0; y < len(pixels); y++ {
-				sea[y+(offsetDown*len(pixels))] += strings.Join(pixels[y], "")
+				joined := strings.Join(pixels[y], "")
+				// remove right left border
+				sea[y+(offsetDown*len(pixels))] += joined[1 : len(joined)-1]
 			}
 		}
 	}
