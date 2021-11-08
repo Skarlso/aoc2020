@@ -174,23 +174,44 @@ func constructImage(row, col int, visited map[int64]struct{}) {
 }
 
 var (
-	monster1     = regexp.MustCompile(`..................#.`)
-	monster2     = regexp.MustCompile(`#....##....##....###`)
-	monster3     = regexp.MustCompile(`.#..#..#..#..#..#...`)
+	mHead        = "..................#."
+	mBody        = "#....##....##....###"
+	mTail        = ".#..#..#..#..#..#..."
+	monsterHead  = regexp.MustCompile(mHead)
+	monsterBody  = regexp.MustCompile(mBody)
+	monsterTail  = regexp.MustCompile(mTail)
 	monsterCount = 15
 )
 
-// TODO: this is finding two items less than it should be.
-// The regex match is not matching overlapping matches.
-// Open byte compare will work.
 func findSeaMonsters(sea []string) int {
 	found := 0
 	count := 0
 	for i := 0; i < len(sea); i++ {
 		count += strings.Count(sea[i], "#")
-		if monster1.MatchString(sea[i]) && monster2.MatchString(sea[i+1]) && monster3.MatchString(sea[i+2]) {
-			found++
+		body := sea[i]
+		for j := 0; j < len(body); j++ {
+			if j+len(mBody) <= len(body) {
+				chunk := body[j : j+len(mBody)]
+				if monsterBody.MatchString(chunk) {
+					if sea[i-1] == "" {
+						continue
+					}
+					head := sea[i-1]
+					head = head[j : j+len(mHead)]
+					if monsterHead.MatchString(head) {
+						if sea[i+1] == "" {
+							continue
+						}
+						tail := sea[i+1]
+						tail = tail[j : j+len(mTail)]
+						if monsterTail.MatchString(tail) {
+							found++
+						}
+					}
+				}
+			}
 		}
+
 	}
 
 	if found > 0 {
