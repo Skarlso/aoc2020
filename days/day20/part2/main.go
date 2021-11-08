@@ -134,7 +134,7 @@ func main() {
 	for i := range image {
 		image[i] = make([]*tile, maxGridSize)
 	}
-	visited := make(map[int64]struct{}, 0)
+	visited := make(map[int64]struct{})
 	constructImage(0, 0, visited)
 }
 
