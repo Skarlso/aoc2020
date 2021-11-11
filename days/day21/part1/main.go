@@ -30,11 +30,12 @@ func main() {
 	// but we also store which food line has which ingredient in the food line itself
 	// so we can compare them.
 	ingredients := make(map[string]map[string]struct{})
+	// allergenes := make(map[string]map[string]struct{})
 	foods := make([]food, 0)
 	for _, line := range bytes.Split(content, []byte("\n")) {
 		// fmt.Println("line: ", string(line))
 		split := strings.Split(string(line), "(contains")
-		fmt.Println(split)
+		// fmt.Println(split)
 		ing := split[0]
 		all := split[1]
 		f := food{
@@ -53,6 +54,10 @@ func main() {
 		}
 		for _, a := range strings.Split(all, ", ") {
 			trimmed := strings.TrimRight(a, ")")
+			trimmed = strings.TrimSpace(trimmed)
+			if a == "" {
+				continue
+			}
 			f.allergies[trimmed] = struct{}{}
 			// add allergene to ingredients? // I would have to know which ones are in this food item...
 			for k := range f.ingredients {
@@ -63,15 +68,55 @@ func main() {
 		}
 		foods = append(foods, f)
 	}
-	fmt.Printf("FOODS: %+v\n", foods)
-	// fmt.Printf("Ingredients: %+v\n", ingredients)
-	for k, v := range ingredients {
-		fmt.Println("k: ", k)
-		fmt.Printf("v: %+v\n", v)
-	}
-	// loop until all ingredients have 0 or 1 allergies
-	// that's flawed because they start out with 0.. this would quit immediately.
 
-	// first loop, assign all allergenes to all ingredients in a first run.
-	// then start trimming them down.
+	// initial cleanup loop
+
+	for _, food := range foods {
+		for a := range food.allergies {
+			for i, alls := range ingredients {
+				// everything that has this allergenes but is NOT in the list of ingredients in the food, remove that allergenes
+				if _, ok := alls[a]; ok {
+					if _, ok := food.ingredients[i]; !ok {
+						delete(ingredients[i], a)
+					}
+				}
+			}
+		}
+	}
+
+	// NOW: Go over all the ingredients which have ONE and remove that ONE allergene from the OTHER ingredients allergies
+	// because it has been taken.
+
+	// remove stragglers
+	for k, v := range ingredients {
+		if len(v) == 1 {
+			for a := range v {
+				for i, all := range ingredients {
+					if k != i {
+						delete(all, a)
+					}
+				}
+			}
+		}
+	}
+
+	// I think we are possibly done...
+	// Get all the one which have no allergies
+	noAllergies := make([]string, 0)
+	for i, a := range ingredients {
+		if len(a) == 0 {
+			noAllergies = append(noAllergies, i)
+		}
+	}
+
+	count := 0
+	for _, f := range foods {
+		for _, noa := range noAllergies {
+			if _, ok := f.ingredients[noa]; ok {
+				count++
+			}
+		}
+	}
+
+	fmt.Println("No allergenes food count: ", count)
 }
