@@ -19,7 +19,10 @@ func TestDisplay(t *testing.T) {
 			},
 		},
 	}
+	c := &circle{
+		head: first,
+	}
 	first.next.next.next.next = first
-	result := first.Display(4)
+	result := c.display(4)
 	assert.Equal(t, "512", result)
 }
