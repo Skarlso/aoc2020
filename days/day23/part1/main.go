@@ -5,91 +5,148 @@ import (
 	"strconv"
 )
 
-// maybe use this...
-// I really don't want to build a tree.
 type cup struct {
 	label int
-	value int
+	next  *cup
 }
 
-var (
-	// data  = []int{3, 8, 9, 1, 2, 5, 4, 6, 7}
-	// moves = 100
-	// cc    = 3 // index of the current cup
-	data  = []int{1, 5, 8, 9, 3, 7, 4, 6, 2}
-	moves = 100
-	cc    = 1
-)
-
-func main() {
-	// fmt.Println(data)
-	cm := 0 // current moves
-	for cm < moves {
-		// take three
-		three := make([]int, 0)
-		ccIndex := findIndexOfCup(cc, data)
-		for i := 0; i < 3; i++ {
-			ci := (i + ccIndex + 1) % len(data)
-			three = append(three, data[ci])
-		}
-		for _, c := range three {
-			// this would be a bit better if this would be a tree, but I don't care for now.
-			index := findIndexOfCup(c, data)
-			data = append(data[:index], data[index+1:]...)
-		}
-		dc := findDestinationCup(cc, data)
-		data = append(data[:dc+1], append(three, data[dc+1:]...)...)
-		// update the index of CC after it has been moved around by the insert again.
-		ccIndex = findIndexOfCup(cc, data)
-		ccIndex = (ccIndex + 1) % len(data)
-		cc = data[ccIndex]
-		cm++
-	}
-
-	indexOfCup := findIndexOfCup(1, data)
-	fromCup := gatherFromCup(indexOfCup, data)
-	fmt.Println("from cup 1: ", fromCup[1:])
+type circle struct {
+	head *cup
 }
 
-// findDestinationCup returns the index of the destination cup.
-func findDestinationCup(cc int, cups []int) int {
-	ccIndex := findIndexOfCup(cc, cups)
-	// fmt.Printf("cc: %d, cc index: %d, cups: %+v\n", cc, ccIndex, cups)
-	value := cups[ccIndex] - 1
-	if value == 0 {
-		value = 9
-	}
-	// fmt.Println("initial value: ", value)
-	for {
-		if i := findIndexOfCup(value, cups); i != -1 {
-			// fmt.Printf("found destination index: %d with value: %d\n", i, cups[i])
-			return i
-		}
-
-		value--
-		if value == 0 {
-			value = 9
-		}
-		// fmt.Println("new value: ", value)
-	}
-}
-
-func gatherFromCup(cup int, cups []int) string {
+func (c *circle) display(from int) string {
+	cp := c.search(from)
+	next := cp.next
 	var result string
 
-	for i := 0; i < len(cups); i++ {
-		currentIndex := (i + cup) % len(cups)
-		result += strconv.Itoa(cups[currentIndex])
+	for next.label != cp.label {
+		result += strconv.Itoa(next.label)
+		next = next.next
 	}
 
 	return result
 }
 
-func findIndexOfCup(cup int, cups []int) int {
-	for i := range cups {
-		if cups[i] == cup {
-			return i
+func (c *circle) search(label int) *cup {
+	curr := c.head
+	for {
+		if curr.label == label {
+			return curr
 		}
+		curr = curr.next
 	}
-	return -1
+}
+
+func (c *circle) follow(n int) *cup {
+	target := c.head
+
+	for i := 0; i < n; i++ {
+		target = target.next
+	}
+
+	return target
+}
+
+// up this sucks that had to duplicate it. Maybe there is some better way.
+func (c *cup) search(label int) *cup {
+	curr := c.next
+	for {
+		if curr.label == label {
+			return curr
+		}
+		if curr.label == c.label {
+			return nil
+		}
+		curr = curr.next
+	}
+}
+
+func (c *cup) follow(n int) *cup {
+	target := c
+
+	for i := 0; i < n; i++ {
+		target = target.next
+	}
+
+	return target
+}
+
+func (c *circle) shuffle() {
+	// select the hand
+	hand := c.head.next
+	// update the circle to point to the following 4th after the 3rd cup
+	c.head.next = c.follow(4)
+	// create a new circle from the hand
+	hand.follow(2).next = hand
+
+	// get the circle's end 4 over from the current one
+	// move the whole circle's ref to the DC
+	// update the head to point to the new point
+	// you don't remove and insert in a linked chain, you move the whole chain x times over.
+
+	var (
+		dc      *cup
+		dcLabel = c.head.label
+	)
+	for {
+		dcLabel--
+		if dcLabel < 1 {
+			dcLabel = max
+		}
+		// if the hand contains the target label, skip
+		if ok := hand.search(dcLabel); ok != nil {
+			continue
+		}
+		// fmt.Println("before: ", dcLabel)
+		dc = c.search(dcLabel)
+		// fmt.Println("after")
+		break
+	}
+
+	// bring the hand back at the dc's location
+	hand.follow(2).next = dc.next
+	dc.next = hand
+
+	// update the circle
+	c.head = c.head.next
+}
+
+var (
+	// data  = []int{3, 8, 9, 1, 2, 5, 4, 6, 7}
+	moves = 100
+	max   = 9
+	// cc    = 3
+	data = []int{1, 5, 8, 9, 3, 7, 4, 6, 2}
+	// moves = 10000000
+	cc = 1
+)
+
+func main() {
+	// fmt.Println(data)
+	first := &cup{
+		label: cc,
+	}
+	c := &circle{
+		head: first,
+	}
+	last := first
+	// Create the cups
+	for _, d := range data[1:] {
+		current := &cup{
+			label: d,
+		}
+		last.next = current
+		last = current
+
+	}
+	last.next = first
+
+	fmt.Println(c.display(3))
+
+	// I will need to cache somewhere.
+	for i := 0; i < moves; i++ {
+		c.shuffle()
+	}
+	result := c.display(1)
+	fmt.Println(result)
 }
