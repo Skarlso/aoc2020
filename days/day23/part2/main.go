@@ -11,7 +11,8 @@ type cup struct {
 }
 
 type circle struct {
-	head *cup
+	head  *cup
+	cache map[int]*cup
 }
 
 func (c *circle) display(from int) string {
@@ -28,6 +29,10 @@ func (c *circle) display(from int) string {
 }
 
 func (c *circle) search(label int) *cup {
+	if cc, ok := c.cache[label]; ok {
+		return cc
+	}
+
 	curr := c.head
 	for {
 		if curr.label == label {
@@ -112,22 +117,27 @@ func (c *circle) shuffle() {
 }
 
 var (
-	// data  = []int{3, 8, 9, 1, 2, 5, 4, 6, 7}
-	moves = 100
-	max   = 9
-	// cc    = 3
-	data = []int{1, 5, 8, 9, 3, 7, 4, 6, 2}
-	// moves = 10000000
-	cc = 1
+	// data = []int{3, 8, 9, 1, 2, 5, 4, 6, 7}
+	// moves = 100
+	max = 1000000
+	// cc  = 3
+	data  = []int{1, 5, 8, 9, 3, 7, 4, 6, 2}
+	moves = 10000000
+	cc    = 1
 )
 
 func main() {
 	// fmt.Println(data)
+	for i := 10; i <= 1000000; i++ {
+		data = append(data, i)
+	}
+	fmt.Println(data[len(data)-1])
 	first := &cup{
 		label: cc,
 	}
 	c := &circle{
-		head: first,
+		head:  first,
+		cache: make(map[int]*cup),
 	}
 	last := first
 	// Create the cups
@@ -137,16 +147,19 @@ func main() {
 		}
 		last.next = current
 		last = current
+		c.cache[d] = current
 
 	}
 	last.next = first
 
-	fmt.Println(c.display(3))
+	// fmt.Println(c.display(3))
 
 	// I will need to cache somewhere.
 	for i := 0; i < moves; i++ {
 		c.shuffle()
 	}
-	result := c.display(1)
-	fmt.Println(result)
+
+	next := c.search(1).next
+	value := next.label * next.next.label
+	fmt.Println(value)
 }
