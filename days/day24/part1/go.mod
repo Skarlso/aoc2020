@@ -1,3 +1,3 @@
 module aoc2020/day24
 
-go 1.14
+go 1.17
