@@ -47,6 +47,21 @@ func main() {
 		}
 	}
 	fmt.Printf("all black tiles in the begin: %d\n", allBlacks)
+
+	// Add all neighbors
+	for k := range grid {
+		for _, d := range directions {
+			c := point{
+				q: k.q + d.q,
+				r: k.r + d.r,
+				s: k.s + d.s,
+			}
+			if _, ok := grid[c]; !ok {
+				grid[c] = 0
+			}
+		}
+	}
+
 	days := 100
 	day := 0
 	for day < days {
@@ -61,13 +76,9 @@ func main() {
 					r: k.r + d.r,
 					s: k.s + d.s,
 				}
-				// v, ok := grid[c]
-				// if !ok {
-				// 	grid[c] = 0
-				// } else if v == 1 {
-				// 	blacks++
-				// }
-				if grid[c] == 1 {
+				if v, ok := grid[c]; !ok {
+					grid[c] = 0
+				} else if v == 1 {
 					blacks++
 				}
 			}
@@ -84,17 +95,16 @@ func main() {
 		// flip them
 		// fmt.Println(flips)
 		for _, f := range flips {
-			// fmt.Printf("from: %d\n", grid[f])
 			grid[f] ^= 1
 		}
 		day++
-		allBlacks := 0
-		for _, v := range grid {
-			if v == 1 {
-				allBlacks++
-			}
-		}
-		fmt.Printf("day: %d black tiles: %d\n", day, allBlacks)
+		// allBlacks := 0
+		// for _, v := range grid {
+		// 	if v == 1 {
+		// 		allBlacks++
+		// 	}
+		// }
+		// fmt.Printf("day: %d black tiles: %d\n", day, allBlacks)
 	}
 	allBlacks = 0
 	for _, v := range grid {
@@ -123,9 +133,9 @@ func move(paths [][]string) map[point]int {
 			pos.r += dir.r
 			pos.s += dir.s
 			// fmt.Printf("pos: %+v\n", pos)
-			if _, ok := grid[pos]; !ok {
-				grid[pos] = 0
-			}
+			// if _, ok := grid[pos]; !ok {
+			// 	grid[pos] = 0
+			// }
 		}
 		grid[pos] ^= 1
 	}
