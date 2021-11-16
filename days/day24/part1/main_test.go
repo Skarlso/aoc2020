@@ -3,6 +3,8 @@ package main
 import (
 	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestParsePath(t *testing.T) {
@@ -32,4 +34,12 @@ func TestParsePath(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestMoving(t *testing.T) {
+	paths := [][]string{
+		{"nw", "w", "sw", "e", "e"},
+	}
+	grid := move(paths)
+	assert.Equal(t, 1, grid[point{0, 0}])
 }
